@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KK01 บ้านเกาะคา 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#e6e9e3; --surface:#f6f7f3; --surface2:#eef0ea; --ink:#1d2a37; --muted:#5b6876; --line:#c8cec5;
+  --accent:#d9661b; --accent-ink:#ffffff; --warn:#b4431b; --ok:#2f7d4f; --scene:#dfe3dc; --ground:#b9bfb3;
+  color-scheme:light;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#141a20; --surface:#1b232b; --surface2:#222c35; --ink:#e3e8ec; --muted:#97a4b0; --line:#2e3a45;
+    --accent:#f08a3c; --accent-ink:#1b1206; --warn:#f08a6a; --ok:#6fcf97; --scene:#182028; --ground:#2a3540;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141a20; --surface:#1b232b; --surface2:#222c35; --ink:#e3e8ec; --muted:#97a4b0; --line:#2e3a45;
+  --accent:#f08a3c; --accent-ink:#1b1206; --warn:#f08a6a; --ok:#6fcf97; --scene:#182028; --ground:#2a3540;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%}
+body{margin:0;height:100%;background:var(--bg);color:var(--ink);
+  font-family:"IBM Plex Sans Thai","Sarabun","Leelawadee UI","Tahoma",system-ui,sans-serif;font-size:15px;line-height:1.55}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 420px;height:100%}
+.stage{position:relative;min-height:0;min-width:0;overflow:hidden;background:var(--scene)}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.title{position:absolute;left:20px;top:16px;pointer-events:none;max-width:52%}
+.title h1{margin:0;font-size:26px;line-height:1.15;font-weight:700;letter-spacing:-.01em}
+.title p{margin:4px 0 0;color:var(--muted);font-size:13.5px}
+.views{position:absolute;right:14px;top:14px;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:46%}
+.btn{font:inherit;font-size:13px;background:var(--surface);color:var(--ink);border:1px solid var(--line);
+  border-radius:6px;padding:5px 10px;cursor:pointer}
+.btn:hover{border-color:var(--muted)}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.btn:focus-visible,input:focus-visible,summary:focus-visible,.tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.dock{position:absolute;left:14px;right:14px;bottom:14px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 18px;
+  align-items:center;background:color-mix(in srgb,var(--surface) 92%,transparent);border:1px solid var(--line);
+  border-radius:10px;padding:10px 14px;backdrop-filter:blur(6px)}
+.ctl label{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--muted);margin-bottom:2px}
+.ctl label b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ctl.seq label b{color:var(--accent)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.toggles{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--surface);font-size:12.5px;padding:3px 8px;
+  border-radius:4px;white-space:nowrap;transform:translate(12px,12px);display:none;z-index:5;max-width:340px;overflow:hidden;text-overflow:ellipsis}
+.loading{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-size:14px;pointer-events:none}
+aside{border-left:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;min-height:0}
+.tabs{display:flex;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{font:inherit;font-size:13.5px;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);
+  padding:11px 9px 9px;cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+.pane{display:none;overflow:auto;padding:16px 18px 28px;flex:1;min-height:0}
+.pane.on{display:block}
+.pane h2{font-size:17px;margin:0 0 6px}
+.pane h3{font-size:14.5px;margin:18px 0 6px}
+.pane p,.pane li{font-size:14px}
+.small{font-size:12.5px;color:var(--muted)}
+.layer{display:grid;grid-template-columns:auto 14px 1fr auto auto;gap:8px;align-items:center;padding:5px 0;border-bottom:1px dashed var(--line)}
+.layer input{margin:0;accent-color:var(--accent)}
+.layer label{font-size:14px}
+.layer.off label{color:var(--muted)}
+.sw{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.25)}
+.layer .n{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.layer .solo{font-size:12px;padding:2px 7px}
+.layer.hit{background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.ok-badge{display:inline-block;font-size:12px;color:var(--ok);border:1px solid currentColor;border-radius:999px;padding:0 8px;margin-left:6px}
+dl.kv{display:grid;grid-template-columns:120px 1fr;gap:6px 10px;margin:10px 0 0;font-size:14px}
+dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.empty{color:var(--muted);border:1px dashed var(--line);border-radius:8px;padding:18px;text-align:center}
+table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+th,td{text-align:left;vertical-align:top;padding:7px 5px;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+th{color:var(--muted);font-weight:500;font-size:12.5px}
+td{font-variant-numeric:tabular-nums}
+#boqtab th:nth-child(1){width:38%}#boqtab th:nth-child(2){width:27%}.na{color:var(--muted)}
+tr.grp td{background:var(--surface2);font-weight:600;font-size:12.5px;color:var(--muted);padding:4px 6px}
+td .why{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.flag{color:var(--warn);font-weight:600}
+.okk{color:var(--ok);font-weight:600}
+code{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;background:var(--surface2);padding:1px 4px;border-radius:3px}
+.issue{border-left:3px solid var(--warn);padding:2px 0 2px 12px;margin:0 0 14px}
+.issue h4{margin:0 0 2px;font-size:14px}
+.issue p{margin:0;font-size:13.5px}
+.issue.info{border-left-color:var(--muted)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin:6px 0 10px;font-size:12.5px;color:var(--muted)}
+details.qty{border-bottom:1px solid var(--line);padding:6px 0}
+details.qty summary{cursor:pointer;font-weight:600;font-size:14px;list-style-position:outside}
+details.qty summary span{font-weight:400;color:var(--muted);font-size:12.5px}
+details.qty ul{margin:6px 0 4px;padding-left:18px}
+details.qty li{font-size:13px;margin:0 0 4px;font-variant-numeric:tabular-nums}
+.sum{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0 4px}
+.sum div{background:var(--surface2);border-radius:8px;padding:8px 10px}
+.sum b{display:block;font-size:18px;font-variant-numeric:tabular-nums}
+.sum span{font-size:12px;color:var(--muted)}
+table.neg th:nth-child(1){width:38%}table.neg th:nth-child(2),table.neg th:nth-child(3){width:19%}
+td.money{text-align:right;font-weight:600}
+ul.miss{padding-left:18px;margin:6px 0}ul.miss li{font-size:13.5px;margin:0 0 6px}
+.gal{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gal figure{margin:0}
+.gal img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;border:1px solid var(--line);cursor:zoom-in;background:var(--surface2);display:block}
+.gal figcaption{font-size:12px;color:var(--muted);margin-top:3px}
+.lb{position:fixed;inset:0;background:rgba(10,14,18,.86);display:none;place-items:center;z-index:20;padding:16px}
+.lb.on{display:grid}
+.lb img{max-width:100%;max-height:86vh;border-radius:6px}
+.lb p{color:#e3e8ec;text-align:center;margin:8px 0 0;font-size:14px}
+@media (min-width:1280px){.dock{grid-template-columns:1.3fr 1fr 1fr 1fr}}
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr);grid-template-rows:78vh auto;height:auto}
+  html,body{height:auto}
+  aside{border-left:0;border-top:1px solid var(--line)}
+  .dock{grid-template-columns:1fr 1fr;left:8px;right:8px;bottom:8px;padding:8px 10px;gap:4px 12px}
+  .title h1{font-size:19px} .title{max-width:none;left:12px;right:12px;top:10px} .title p{font-size:12px}
+  .views{top:72px;left:8px;right:8px;max-width:none;justify-content:flex-start;gap:4px} .views .btn{font-size:12px;padding:3px 7px}
+  .tabs button{padding:10px 7px 8px;font-size:13px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <section class="stage" aria-label="มุมมอง 3 มิติ">
+    <canvas id="cv"></canvas>
+    <div class="loading" id="loading">กำลังสร้างโมเดล…</div>
+    <div class="title">
+      <h1>KK01 บ้านเกาะคา</h1>
+      <p>โมเดลก่อสร้างทีละขั้น ST01–ST18 · บ้านพักอาศัย คสล. 1 ชั้น อ.เกาะคา จ.ลำปาง · แบบร่าง (DRAFT)</p>
+    </div>
+    <div class="views" role="group" aria-label="มุมมองกล้อง">
+      <button class="btn" data-view="iso" aria-pressed="true">ไอโซเมตริก</button>
+      <button class="btn" data-view="front">ด้านหน้า</button>
+      <button class="btn" data-view="back">ด้านหลัง</button>
+      <button class="btn" data-view="side">ด้านข้าง</button>
+      <button class="btn" data-view="top">แปลน</button>
+      <button class="btn" data-view="inside">ภายใน</button>
+      <button class="btn" data-view="under">ใต้ดิน</button>
+    </div>
+    <div class="dock">
+      <div class="ctl seq"><label for="seq">ลำดับก่อสร้างถึง <b id="seqv"></b></label><input id="seq" type="range" min="1" max="16" step="1" value="16"></div>
+      <div class="ctl"><label for="expl">แยกชั้นงาน <b id="explv">0%</b></label><input id="expl" type="range" min="0" max="100" step="1" value="0"></div>
+      <div class="ctl"><label for="cut">ตัดจากด้านหน้า <b id="cutv">ไม่ตัด</b></label><input id="cut" type="range" min="-1000" max="12300" step="50" value="-1000"></div>
+      <div class="ctl"><label for="lvl">ตัดระดับ (แปลน) <b id="lvlv">ไม่ตัด</b></label><input id="lvl" type="range" min="-1700" max="6400" step="25" value="6400"></div>
+      <div class="toggles">
+        <button class="btn" id="anim" aria-pressed="false">▶ เล่นลำดับก่อสร้าง</button>
+        <button class="btn" id="xray" aria-pressed="false">โปร่งใส</button>
+        <button class="btn" id="rebar" aria-pressed="false">เหล็กเสริม</button>
+        <button class="btn" id="edges" aria-pressed="true">เส้นขอบ</button>
+        <button class="btn" id="soil" aria-pressed="true">ผิวดิน</button>
+      </div>
+    </div>
+    <div class="tip" id="tip"></div>
+  </section>
+  <aside>
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-tab="layers">ชั้นงาน</button>
+      <button role="tab" aria-selected="false" data-tab="part">ชิ้นส่วน</button>
+      <button role="tab" aria-selected="false" data-tab="qty">ปริมาณ</button>
+      <button role="tab" aria-selected="false" data-tab="boq">เทียบ BOQ</button>
+      <button role="tab" aria-selected="false" data-tab="neg">ต่อรอง</button>
+      <button role="tab" aria-selected="false" data-tab="check">ต้องยืนยัน</button>
+      <button role="tab" aria-selected="false" data-tab="img">ภาพ render</button>
+    </div>
+
+    <div class="pane on" id="p-layers">
+      <p class="small">แต่ละชั้นคือขั้นตอนก่อสร้างจริง เปิด-ปิดได้ทีละชั้น หรือกด “ดูเดี่ยว” · คลิกชิ้นส่วนในภาพเพื่อดูชื่อ ขนาด และปริมาณของขั้นนั้น</p>
+      <div id="layerlist"></div>
+      <h3>ข้อมูลหลัก</h3>
+      <dl class="kv" id="mainDims"></dl>
+    </div>
+
+    <div class="pane" id="p-part">
+      <div id="partinfo" class="empty">คลิกชิ้นส่วนในภาพ 3D เพื่อดูรายละเอียด</div>
+    </div>
+
+    <div class="pane" id="p-qty">
+      <h2>ปริมาณงานจากโมเดล</h2>
+      <p class="small">ถอดจากรูปทรงในโมเดลโดยตรง (build ล่าสุด 5 พ.ย. 69) ทุกขั้นผ่านการตรวจอัตโนมัติ — คลิกหัวข้อเพื่อดูรายการ</p>
+      <div id="qtylist"></div>
+    </div>
+
+    <div class="pane" id="p-boq">
+      <h2>ใบเสนอราคา ผรม. เทียบปริมาณจากโมเดล</h2>
+      <p class="small">ไล่ตามรายการในใบเสนอราคา ผรม. (ตัวอย่าง) ทุกบรรทัด ใช้หน่วยของ ผรม. · ฝั่งโมเดลแสดง <b>สุทธิ → เผื่อแล้ว</b> ตามอัตราด้านล่าง · เหล็กรูปพรรณนับ C เดี่ยวยาว 6 ม.</p>
+      <div class="legend"><span class="okk">ใกล้เคียง</span><span class="flag">ต่างกัน ควรถาม</span><span class="na">เทียบไม่ได้ / ไม่ได้ถอด</span></div>
+      <details class="qty"><summary>อัตราเผื่อที่ใช้กับปริมาณโมเดล</summary><table id="wastetab"></table></details>
+      <table id="boqtab"><thead><tr><th>รายการตามใบ ผรม.</th><th>ผรม.</th><th>โมเดล (ปริมาณจริง)</th></tr></thead><tbody></tbody></table>
+    </div>
+
+    <div class="pane" id="p-neg">
+      <h2>จุดต่อรองกับใบเสนอราคา ผรม. (ตัวอย่าง)</h2>
+      <p class="small">คิดมูลค่าด้วย<b>ราคาต่อหน่วยของ ผรม. เอง</b> (ของ + แรง) × ส่วนต่างปริมาณกับโมเดล<b>ที่เผื่อแล้ว</b> (อัตราดูในแท็บเทียบ BOQ) · ใช้เป็นคำถาม “คิดจากอะไร” ไม่ใช่ข้อกล่าวหา — ส่วนที่เกินจากการเผื่อปกติแล้วเท่านั้นที่นับ</p>
+      <div class="sum" id="negsum"></div>
+      <h3>1 · ต้องได้ตามแบบ (ไม่ใช่ของแถม)</h3>
+      <p class="small">ใบเสนอราคาต่ำกว่าแบบ — ให้แก้ในราคาเดิม</p>
+      <table class="neg" id="neg-under"></table>
+      <h3>2 · รายการที่ยังไม่มีในใบเสนอราคา</h3>
+      <p class="small">ถ้าไม่ระบุตอนนี้ จะกลายเป็น “งานเพิ่ม” ระหว่างก่อสร้าง</p>
+      <ul class="miss" id="neg-miss"></ul>
+      <h3>3 · ปริมาณที่ดูเผื่อเกิน</h3>
+      <p class="small">ขอดูวิธีคิด ถ้าลดไม่ได้ ให้แลกเป็นข้อ 1–2 และ 4</p>
+      <table class="neg" id="neg-over"></table>
+      <h3>4 · ของที่ขอเพิ่ม (แลกกับข้อ 3)</h3>
+      <ul class="miss" id="neg-ask"></ul>
+      <h3>อื่น ๆ ที่ควรรู้ก่อนคุย</h3>
+      <ul class="miss">
+        <li><b>ตรวจเลขทุกบรรทัด</b> — จำนวน × ราคา ต้องเท่ากับจำนวนเงิน ถ้าใบเขียนต่ำไป ผรม. มักขอแก้ภายหลัง ให้ตกลงราคารวมให้ชัด</li>
+        <li><b>ใบเสนอราคาไม่รวม</b> แอร์ เครื่องทำน้ำอุ่น ถังเก็บน้ำ และปั๊มน้ำ (หมายเหตุท้ายใบ)</li>
+        <li><b>วัสดุที่ต่างจากแบบ</b> — ระบุให้ชัดว่ารับได้หรือไม่ (เช่น ประตู หน้าต่าง พื้นห้องนอน โคมไฟ)</li>
+        <li><b>ไฟฟ้าคิดเป็นจุด</b> — ให้ยืนยันว่ารวมท่อ PVC สาย THW บล็อก และหน้ากากแล้ว</li>
+        <li>ตัวเลขโมเดลมาจากการตีความแบบ (ดูแท็บต้องยืนยัน) งานโครงสร้างต้องให้วิศวกรยืนยันก่อน</li>
+      </ul>
+    </div>
+
+    <div class="pane" id="p-check">
+      <h2>สิ่งที่ต้องยืนยัน</h2>
+      <p class="small">ข้อตีความแบบและค่าที่สมมติไว้ระหว่างปั้นโมเดล (รายละเอียดอยู่ในไฟล์ spec ของแต่ละขั้น)</p>
+      <div id="issues"></div>
+    </div>
+
+    <div class="pane" id="p-img">
+      <h2>ภาพ render จาก Blender</h2>
+      <p class="small">ภาพตรวจงานของแต่ละขั้น คลิกเพื่อขยาย</p>
+      <div class="gal" id="gal"></div>
+    </div>
+  </aside>
+</div>
+<div class="lb" id="lb" role="dialog" aria-label="ภาพขยาย"><div><img id="lbimg" alt=""><p id="lbcap"></p></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const KK = /*__DATA__*/null;
+const LAYERS = KK.model.layers, PARTS = KK.model.parts;
+const $ = id => document.getElementById(id);
+const fmt = (n, d=0) => n.toLocaleString("th-TH", {minimumFractionDigits:d, maximumFractionDigits:d});
+
+/* ---------- names ---------- */
+const EL_TH = {concrete:"คอนกรีต", lean_concrete:"คอนกรีตหยาบ", sand:"ทรายบดอัด", rebar:"เหล็กเสริม", ties:"เหล็กปลอก", stirrups:"เหล็กปลอก",
+  mesh:"ตะแกรงเหล็ก", precast:"แผ่นพื้นสำเร็จรูป", plate:"แผ่นเหล็ก", brick:"อิฐมอญ", plaster:"ปูนฉาบ", steel:"เหล็กรูปพรรณ",
+  fascia:"เชิงชาย", tile_bed:"กระเบื้องหลังคา", sheet:"เมทัลชีท", soffit:"ฝ้าชายคา", ceiling:"ฝ้า", cline:"โครงฝ้า", paint:"สี", floor_tile:"กระเบื้องพื้น",
+  step_tile:"กระเบื้องบันได", riser_tile:"กระเบื้องลูกตั้ง", wall_tile:"กระเบื้องผนัง", elec:"อุปกรณ์ไฟฟ้า", conduit:"ท่อร้อยสาย",
+  jbox:"กล่องพักสาย", meter:"ตู้มิเตอร์", rod:"หลักดิน", door_leaf:"บานประตู", frame:"วงกบ", glass:"กระจก", hardware:"อุปกรณ์ประตู",
+  sash:"บานหน้าต่าง", fixture:"สุขภัณฑ์", struct:"ถัง / บ่อ / อุปกรณ์", pipe:"ท่อ", cladding:"ไม้เทียม", steel_rail:"เหล็กกล่อง",
+  arch:"อลูมิเนียม", screen:"กระจกนิรภัย", screen_ch:"รางยู"};
+const PREFIX_TH = [["EL_DL","โคมดาวน์ไลท์ LED 12 W ฝังฝ้า"],["EL_EAVE","โคมซาลาเปา LED 18 W ใต้ชายคา"],["EL_SO","เต้ารับคู่ 3 ขา"],
+  ["EL_SW","สวิตช์ทางเดียว"],["EL_WH","จุดเครื่องทำน้ำอุ่น 4,500 W"],["EL_PB","ตู้ consumer unit 18 ช่อง"],["EL_FLUO","โคม LED 1×18 W"],
+  ["EL_FCU","แฟนคอยล์แอร์ (FCU)"],["EL_CDU","คอยล์ร้อนแอร์ (CDU)"],["PT_Coat","สีทับหน้าผนัง 2 เที่ยว"],
+  ["SN_FX_wc","ชักโครก"],["SN_FX_lav","อ่างล้างหน้า"],["SN_FX_shower","ฝักบัว"],["SN_FX_spray","สายชำระ"],["SN_FX_sink","ซิงก์ล้างจาน"],["SN_FX_fd","ตะแกรงระบายน้ำพื้น (FD)"]];
+const FIX_TH = {wc:"ชักโครก", lav:"อ่างล้างหน้า", shower:"ฝักบัว", spray:"สายชำระ", sink:"ซิงก์ล้างจาน", fd:"ตะแกรงระบายน้ำพื้น (FD)"};
+function partName(p){
+  if (p.t && !FIX_TH[p.t]) return p.t;
+  if (FIX_TH[p.t]) return FIX_TH[p.t];
+  const f = PREFIX_TH.find(([k]) => p.n.startsWith(k));
+  return f ? f[1] : p.n;
+}
+const stageOf = L => LAYERS[L].split(" ")[0];
+const REP_KEY = L => ({ST12: L === 11 ? "ST12a" : "ST12b"})[stageOf(L)] || stageOf(L);
+
+/* ---------- three setup ---------- */
+const cv = $("cv");
+const renderer = new THREE.WebGLRenderer({canvas:cv, antialias:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+renderer.localClippingEnabled = true;
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(36, 1, 0.05, 400);
+const controls = new THREE.OrbitControls(camera, cv);
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x8a8f85, 0.72));
+const sun = new THREE.DirectionalLight(0xffffff, 0.78); sun.position.set(-8, 16, 10); scene.add(sun);
+const fill = new THREE.DirectionalLight(0xffffff, 0.28); fill.position.set(14, 6, -18); scene.add(fill);
+
+const clipY = new THREE.Plane(new THREE.Vector3(0,0,-1), 100);   // keeps Blender y >= cut
+const clipZ = new THREE.Plane(new THREE.Vector3(0,-1,0), 100);   // keeps height <= level
+const CLIPS = [clipY, clipZ];
+const CX = 6.5, CZ = -5.6;
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(40, 36),
+  new THREE.MeshLambertMaterial({color:0xb9bfb3, transparent:true, opacity:0.55, depthWrite:false, clippingPlanes:CLIPS, side:THREE.DoubleSide}));
+ground.rotation.x = -Math.PI/2; ground.position.set(CX, -0.003, CZ); ground.renderOrder = 2; scene.add(ground);
+const grid = new THREE.GridHelper(36, 36, 0x8d958b, 0xa9b0a6); grid.position.set(CX, 0, CZ);
+grid.material.transparent = true; grid.material.opacity = 0.35; scene.add(grid);
+
+/* Blender (x, y, z) in mm  →  three (x, z, −y) in m */
+function boxGeo(b){
+  const P = [], N = [];
+  const quad = (a, c, d, e, n) => { P.push(...a,...c,...d, ...a,...d,...e); for (let i=0;i<6;i++) N.push(...n); };
+  for (let i = 0; i < b.length; i += 6){
+    const x0=b[i]/1e3, x1=b[i+3]/1e3, y0=b[i+2]/1e3, y1=b[i+5]/1e3, z0=-b[i+4]/1e3, z1=-b[i+1]/1e3;
+    quad([x1,y0,z0],[x1,y1,z0],[x1,y1,z1],[x1,y0,z1],[1,0,0]);  quad([x0,y0,z1],[x0,y1,z1],[x0,y1,z0],[x0,y0,z0],[-1,0,0]);
+    quad([x0,y1,z1],[x1,y1,z1],[x1,y1,z0],[x0,y1,z0],[0,1,0]);  quad([x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1],[0,-1,0]);
+    quad([x0,y0,z1],[x1,y0,z1],[x1,y1,z1],[x0,y1,z1],[0,0,1]);  quad([x1,y0,z0],[x0,y0,z0],[x0,y1,z0],[x1,y1,z0],[0,0,-1]);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.Float32BufferAttribute(P,3)); g.setAttribute("normal", new THREE.Float32BufferAttribute(N,3));
+  return g;
+}
+function triGeo(v, f){
+  const P = new Float32Array(f.length*3);
+  f.forEach((k, i) => { P[i*3] = v[k*3]/1e3; P[i*3+1] = v[k*3+2]/1e3; P[i*3+2] = -v[k*3+1]/1e3; });
+  const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(P,3)); g.computeVertexNormals(); return g;
+}
+const SIDES = 6;
+function tubeGeo(polys, r){
+  const P = [], a = new THREE.Vector3(), b = new THREE.Vector3(), d = new THREE.Vector3(), u = new THREE.Vector3(), w = new THREE.Vector3();
+  const up = new THREE.Vector3(0,1,0), side = new THREE.Vector3(1,0,0);
+  let len = 0;
+  for (const s of polys){
+    for (let i = 0; i + 5 < s.length; i += 3){
+      a.set(s[i]/1e3, s[i+2]/1e3, -s[i+1]/1e3); b.set(s[i+3]/1e3, s[i+5]/1e3, -s[i+4]/1e3);
+      d.subVectors(b, a); const L = d.length(); if (L < 1e-6) continue; len += L; d.divideScalar(L);
+      u.crossVectors(d, Math.abs(d.y) < 0.9 ? up : side).normalize(); w.crossVectors(d, u);
+      const ring = k => { const t = k/SIDES*Math.PI*2, c = Math.cos(t)*r, sn = Math.sin(t)*r; return [u.x*c+w.x*sn, u.y*c+w.y*sn, u.z*c+w.z*sn]; };
+      for (let k = 0; k < SIDES; k++){
+        const o0 = ring(k), o1 = ring(k+1);
+        const A0=[a.x+o0[0],a.y+o0[1],a.z+o0[2]], A1=[a.x+o1[0],a.y+o1[1],a.z+o1[2]], B0=[b.x+o0[0],b.y+o0[1],b.z+o0[2]], B1=[b.x+o1[0],b.y+o1[1],b.z+o1[2]];
+        P.push(...A0,...B0,...B1, ...A0,...B1,...A1);
+      }
+    }
+  }
+  const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(P,3)); g.computeVertexNormals();
+  g.userData.len = len; return g;
+}
+
+const meshes = [], byLayer = LAYERS.map(() => []);
+const edgeMat = new THREE.LineBasicMaterial({color:0x1d2a37, transparent:true, opacity:0.22, clippingPlanes:CLIPS});
+const GHOST_EL = new Set(["glass","screen"]);
+function build(){
+  PARTS.forEach(p => {
+    let geo, line = false;
+    if (p.b) geo = boxGeo(p.b);
+    else if (p.v) geo = triGeo(p.v, p.f);
+    else if (p.p){ geo = tubeGeo(p.p, Math.max((p.d||8)/2000, 0.003)); line = true; }
+    else return;
+    geo.computeBoundingBox(); geo.computeBoundingSphere();
+    const op = GHOST_EL.has(p.e) ? 0.35 : 1;
+    if (p.e === "tile_bed") p.c = "#8a5244";            // CPAC tile colour (texture in Blender)
+    const mat = new THREE.MeshLambertMaterial({color:p.c, transparent:op<1, opacity:op, depthWrite:op>=1, clippingPlanes:CLIPS, side:THREE.DoubleSide});
+    const m = new THREE.Mesh(geo, mat);
+    if (!line && geo.attributes.position.count < 60000){
+      const e = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 30), edgeMat); e.raycast = () => {}; m.add(e); m.userData.edge = e;
+    }
+    m.userData.p = p; m.userData.op = op; m.userData.line = line;
+    scene.add(m); meshes.push(m); byLayer[p.L].push(m);
+  });
+}
+
+/* ---------- state ---------- */
+const XRAY_SKIP = new Set([6, 11, 12, 14]);          // roof frame, electrical, conduit, sanitary stay solid in x-ray
+const STRUCT = new Set([0,1,2,3,4,5]);
+const state = {seq:LAYERS.length, expl:0, cut:-1000, lvl:6400, xray:false, rebar:false, edges:true, soil:true, vis:LAYERS.map(()=>true), sel:null};
+function applyState(){
+  const t = state.expl/100;
+  meshes.forEach(m => {
+    const p = m.userData.p;
+    m.position.y = p.L * 0.55 * t;
+    let vis = state.vis[p.L] && p.L < state.seq;
+    if (p.rb && !state.rebar) vis = false;
+    m.visible = vis;
+    let op = m.userData.op;
+    if (state.xray && !XRAY_SKIP.has(p.L) && !p.rb) op = Math.min(op, 0.14);
+    if (state.rebar && !p.rb && STRUCT.has(p.L) && !m.userData.line) op = Math.min(op, 0.22);
+    const mat = m.material;
+    mat.opacity = op; mat.transparent = op < 1; mat.depthWrite = op >= 0.5;
+    mat.emissive.setHex(state.sel === m ? 0x8a3a00 : 0x000000);
+    if (m.userData.edge) m.userData.edge.visible = state.edges && op >= 0.5;
+  });
+  clipY.constant = state.cut > -1000 ? -state.cut/1000 : 100;
+  clipZ.constant = state.lvl < 6400 ? state.lvl/1000 : 100;
+  ground.visible = grid.visible = state.soil;
+  $("seqv").textContent = state.seq >= LAYERS.length ? "ครบทุกขั้น" : LAYERS[state.seq-1];
+  $("explv").textContent = state.expl + "%";
+  $("cutv").textContent = state.cut <= -1000 ? "ไม่ตัด" : "y = " + fmt(state.cut/1000, 2) + " ม.";
+  $("lvlv").textContent = state.lvl >= 6400 ? "ไม่ตัด" : (state.lvl >= 0 ? "+" : "") + fmt(state.lvl/1000, 2) + " ม.";
+  document.querySelectorAll(".layer").forEach(r => {
+    const L = +r.dataset.l; r.classList.toggle("off", !(state.vis[L] && L < state.seq));
+  });
+}
+
+/* ---------- theme ---------- */
+function themeScene(){
+  const cs = getComputedStyle(document.documentElement);
+  scene.background = new THREE.Color(cs.getPropertyValue("--scene").trim() || "#dfe3dc");
+  ground.material.color.set(cs.getPropertyValue("--ground").trim() || "#b9bfb3");
+  const dark = (cs.getPropertyValue("color-scheme")||"").includes("dark");
+  edgeMat.color.set(dark ? 0x05080b : 0x1d2a37);
+}
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", themeScene);
+new MutationObserver(themeScene).observe(document.documentElement, {attributes:true, attributeFilter:["data-theme"]});
+
+/* ---------- camera views ---------- */
+const VIEWS = {
+  iso:{p:[-10,14.5,11.5], t:[CX,1.0,CZ]}, front:{p:[CX,2.6,20], t:[CX,2.0,CZ]}, back:{p:[CX,3.2,-31], t:[CX,2.0,CZ]},
+  side:{p:[32,3.0,CZ], t:[CX,2.0,CZ]}, top:{p:[CX,36,CZ+0.01], t:[CX,0,CZ]},
+  inside:{p:[1.2,2.3,-1.6], t:[7.5,1.6,-6.5], fov:64}, under:{p:[-9,-8,11], t:[CX,-0.6,CZ]}
+};
+let tween = null;
+function goView(k){
+  const v = VIEWS[k], from = {p:camera.position.clone(), t:controls.target.clone()};
+  const to = {p:new THREE.Vector3(...v.p), t:new THREE.Vector3(...v.t)};
+  const fit = Math.max(1, 1.05 / camera.aspect);        // narrow panes: step back
+  to.p.sub(to.t).multiplyScalar(k === "inside" ? 1 : fit).add(to.t);
+  camera.fov = v.fov || 36; camera.updateProjectionMatrix();
+  document.querySelectorAll("[data-view]").forEach(b => b.setAttribute("aria-pressed", b.dataset.view === k));
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches){ camera.position.copy(to.p); controls.target.copy(to.t); return; }
+  tween = {from, to, t0:performance.now(), d:700};
+}
+document.querySelectorAll("[data-view]").forEach(b => b.onclick = () => goView(b.dataset.view));
+
+
+/* ---------- controls ---------- */
+$("seq").oninput = e => { state.seq = +e.target.value; applyState(); };
+$("expl").oninput = e => { state.expl = +e.target.value; applyState(); };
+$("cut").oninput = e => { state.cut = +e.target.value; applyState(); };
+$("lvl").oninput = e => { state.lvl = +e.target.value; applyState(); };
+const toggle = (id, key) => $(id).onclick = e => { state[key] = !state[key]; e.currentTarget.setAttribute("aria-pressed", state[key]); applyState(); };
+toggle("xray", "xray"); toggle("rebar", "rebar"); toggle("edges", "edges"); toggle("soil", "soil");
+let anim = null;
+$("anim").onclick = e => {
+  if (anim){ clearInterval(anim); anim = null; e.currentTarget.setAttribute("aria-pressed", false); e.currentTarget.textContent = "▶ เล่นลำดับก่อสร้าง"; return; }
+  const btn = e.currentTarget; btn.setAttribute("aria-pressed", true); btn.textContent = "■ หยุด";
+  state.seq = 1; $("seq").value = 1; applyState();
+  anim = setInterval(() => {
+    if (state.seq >= LAYERS.length){ clearInterval(anim); anim = null; btn.setAttribute("aria-pressed", false); btn.textContent = "▶ เล่นลำดับก่อสร้าง"; return; }
+    state.seq++; $("seq").value = state.seq; applyState();
+  }, 1100);
+};
+
+/* ---------- layer list ---------- */
+function layerList(){
+  const ll = $("layerlist");
+  LAYERS.forEach((label, L) => {
+    const ms = byLayer[L].filter(m => !m.userData.p.rb); if (!ms.length) return;
+    const row = document.createElement("div"); row.className = "layer"; row.dataset.l = L;
+    row.innerHTML = `<input type="checkbox" id="lg-${L}" checked><span class="sw" style="background:${ms[0].userData.p.c}"></span>
+      <label for="lg-${L}">${label}</label><span class="n">${ms.length + byLayer[L].length - ms.length}</span><button class="btn solo" type="button">ดูเดี่ยว</button>`;
+    row.querySelector("input").onchange = e => { state.vis[L] = e.target.checked; applyState(); };
+    row.querySelector(".solo").onclick = () => {
+      const only = state.vis.every((v, k) => k === L ? v : !v);
+      state.vis = state.vis.map((_, k) => only ? true : k === L);
+      if (!only && state.seq <= L){ state.seq = LAYERS.length; $("seq").value = state.seq; }
+      ll.querySelectorAll("input").forEach(i => i.checked = state.vis[+i.id.slice(3)]);
+      applyState();
+    };
+    ll.appendChild(row);
+  });
+  $("mainDims").innerHTML = [
+    ["ที่ตั้ง", "ม.5 ต.เกาะคา อ.เกาะคา จ.ลำปาง (แบบ 1.9.8.0, 31 แผ่น)"],
+    ["กริด", "x 0 – 13.00 ม. (แนว 1–6) · y 0 – 12.20 ม. (แนว G–A)"],
+    ["ระดับพื้น", "+0.80 (ระเบียง/ห้องน้ำ +0.70) = ผิวกระเบื้อง; โครงสร้างต่ำกว่า 3 ซม."],
+    ["ฐานราก", "F1 1.20×1.20×0.25 ม. ลึก 1.50 ม. · 23 ฐาน"],
+    ["เสา / คาน", "เสา 0.20×0.20 · คานคอดิน 0.20×0.40 · หัวเสาบ้านหลัก +4.175"],
+    ["หลังคา", "ปั้นหยา 30° กระเบื้อง CPAC ชายคา 1.00 ม. อกไก่ +6.30 · เพิงหลังเมทัลชีท"],
+    ["ระบบ", "ไฟฟ้า 14 วงจร + เมน · ประปา/สุขาภิบาล ถังบำบัด 2 ถัง"],
+    ["ชิ้นส่วน", fmt(PARTS.length) + " ชิ้นในหน้านี้ (ไม่รวมสีรองพื้น ปูนกาว ยาแนว ฯลฯ)"],
+    ["การตรวจ", "build จาก Blender ว่าง + ตรวจทุกขั้น ST01–ST18 ไม่พบปัญหา <span class='ok-badge'>problems: 0</span>"]
+  ].map(([a,b]) => `<dt>${a}</dt><dd>${b}</dd>`).join("");
+}
+
+/* ---------- tabs ---------- */
+function showTab(k){
+  document.querySelectorAll("[data-tab]").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === k));
+  document.querySelectorAll(".pane").forEach(p => p.classList.toggle("on", p.id === "p-" + k));
+}
+document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => showTab(b.dataset.tab));
+
+/* ---------- picking ---------- */
+const ray = new THREE.Raycaster(), ptr = new THREE.Vector2(), tip = $("tip");
+function pick(ev){
+  const r = cv.getBoundingClientRect();
+  ptr.set(((ev.clientX - r.left)/r.width)*2-1, -((ev.clientY - r.top)/r.height)*2+1);
+  ray.setFromCamera(ptr, camera);
+  const hits = ray.intersectObjects(meshes.filter(m => m.visible), false);
+  for (const h of hits){
+    const w = h.point;
+    if (clipY.distanceToPoint(w) < 0 || clipZ.distanceToPoint(w) < 0) continue;
+    if (h.object.material.opacity < 0.5 && hits.length > 1) continue;
+    return h.object;
+  }
+  return null;
+}
+function showPart(m){
+  state.sel = m; applyState();
+  document.querySelectorAll(".layer").forEach(r => r.classList.toggle("hit", !!m && +r.dataset.l === m.userData.p.L));
+  if (!m){ $("partinfo").className = "empty"; $("partinfo").textContent = "คลิกชิ้นส่วนในภาพ 3D เพื่อดูรายละเอียด"; return; }
+  const p = m.userData.p, bb = m.geometry.boundingBox;
+  const sx = (bb.max.x-bb.min.x)*1e3, sy = (bb.max.z-bb.min.z)*1e3, sz = (bb.max.y-bb.min.y)*1e3;
+  const same = PARTS.filter(q => partName(q) === partName(p) && q.L === p.L).length;
+  const nb = p.b ? p.b.length/6 : 0;
+  $("partinfo").className = "";
+  $("partinfo").innerHTML = `<h2>${partName(p)}</h2><p class="small">${LAYERS[p.L]}</p>
+  <dl class="kv">
+    <dt>ชื่อในโมเดล</dt><dd><code>${p.n}</code></dd>
+    ${p.e ? `<dt>ชนิด</dt><dd>${EL_TH[p.e] || p.e}</dd>` : ""}
+    <dt>ขอบเขต</dt><dd>${fmt(sx)} × ${fmt(sy)} × ${fmt(sz)} มม. (x × y × สูง)</dd>
+    <dt>ระดับ</dt><dd>${fmt(bb.min.y, 3)} ถึง ${fmt(bb.max.y, 3)} ม.</dd>
+    ${nb > 1 ? `<dt>รูปทรง</dt><dd>${fmt(nb)} กล่องย่อย (ถอดปริมาณจากกล่องเหล่านี้)</dd>` : ""}
+    ${p.p ? `<dt>ความยาวรวม</dt><dd>${fmt(m.geometry.userData.len, 2)} ม. (${fmt(p.p.length)} เส้น, Ø${p.d} มม.)</dd>` : ""}
+    <dt>ชิ้นชื่อเดียวกัน</dt><dd>${same}</dd>
+  </dl>
+  <h3>ปริมาณของขั้นนี้</h3>
+  <ul>${(KK.rep[REP_KEY(p.L)] || []).slice(0, 8).map(l => `<li class="small">${l}</li>`).join("")}</ul>
+  <button class="btn" type="button" id="toqty">ดูปริมาณทั้งหมดของขั้นนี้</button>`;
+  $("toqty").onclick = () => { showTab("qty"); const d = document.querySelector(`details[data-k="${REP_KEY(p.L)}"]`); if (d){ d.open = true; d.scrollIntoView({block:"start"}); } };
+}
+let down = null;
+cv.addEventListener("pointerdown", e => { down = {x:e.clientX, y:e.clientY}; });
+cv.addEventListener("pointerup", e => {
+  if (!down || Math.hypot(e.clientX-down.x, e.clientY-down.y) > 5) return;
+  const m = pick(e); showPart(m); if (m) showTab("part");
+});
+let hoverEv = null;
+cv.addEventListener("pointermove", e => { if (e.buttons || e.pointerType === "touch"){ tip.style.display = "none"; hoverEv = null; return; } hoverEv = e; });
+cv.addEventListener("pointerleave", () => { tip.style.display = "none"; hoverEv = null; });
+function hover(){
+  if (!hoverEv) return; const e = hoverEv; hoverEv = null;
+  const m = pick(e);
+  if (m){ const r = cv.getBoundingClientRect(); tip.textContent = partName(m.userData.p); tip.style.left = (e.clientX-r.left)+"px"; tip.style.top = (e.clientY-r.top)+"px"; tip.style.display = "block"; cv.style.cursor = "pointer"; }
+  else { tip.style.display = "none"; cv.style.cursor = ""; }
+}
+
+/* ---------- quantities ---------- */
+const REP_LABEL = {ST01:"ST01 ฐานราก", ST02:"ST02 ตอม่อ", ST03:"ST03 คานคอดิน", ST04:"ST04 พื้น", ST05:"ST05 เสา", ST06:"ST06 ผนัง + ฉาบ",
+  ST07:"ST07 โครงหลังคาเหล็ก", ST08:"ST08 มุงหลังคา", ST09:"ST09 ฝ้า", ST10:"ST10 สี", ST11:"ST11 กระเบื้อง + บันได",
+  ST12a:"ST12a อุปกรณ์ไฟฟ้า", ST12b:"ST12b วงจร ท่อ สายไฟ", ST14:"ST14 ประตูหน้าต่าง", ST16:"ST16 ประปา สุขาภิบาล", ST18:"ST18 รายการย่อย"};
+function qtyList(){
+  $("qtylist").innerHTML = Object.keys(REP_LABEL).map(k => `<details class="qty" data-k="${k}"><summary>${REP_LABEL[k]} <span>· ${(KK.rep[k]||[]).length} รายการ</span></summary>
+    <ul>${(KK.rep[k]||[]).map(l => `<li>${l.replace(/^\s+/, "")}</li>`).join("")}</ul></details>`).join("");
+}
+
+/* ---------- BOQ ---------- */
+const NEG = {   // ตัวอย่าง (SAMPLE) — แทนด้วยตัวเลขจริงของโปรเจกต์ ดู references/boq_negotiation.md
+  over: [
+    ["ฉาบปูน", "600 ตร.ม.", "490.0", 26400, "ตัวอย่าง: 240 บ./ตร.ม. (ของ + แรง)"],
+    ["จันทันเหล็ก C100", "60 เส้น", "40", 16000, "ตัวอย่าง: 800 บ./เส้น"],
+    ["ผนังก่ออิฐมอญ", "300 ตร.ม.", "250.0", 17500, "ตัวอย่าง: 350 บ./ตร.ม. · ถามว่าหักช่องเปิดหรือยัง"]
+  ],
+  under: [
+    ["เสาเอ็น / ทับหลัง", "120 ม.", "340.0", 26400, "ตัวอย่าง: 120 บ./ม."],
+    ["แผ่นพื้น PS ตาม LL ในแบบ", "LL ต่ำกว่าแบบ", "LL ตามแบบ", null, "ให้ ผรม. เสนอส่วนต่าง"]
+  ],
+  missing: [
+    ["ท่อน้ำดีพร้อมข้อต่อ วาล์ว", "ตัวอย่าง: ใบเสนอราคายังไม่มีรายการ"],
+    ["บันได ค.ส.ล.", "ตัวอย่าง: ใบเสนอราคายังไม่มีรายการ"]
+  ],
+  ask: [
+    ["เครื่องทำน้ำอุ่น", "ตัวอย่าง: ของไม่แพง ขอใส่ในราคาเดิม"],
+    ["เตรียมระบบแอร์ (ท่อน้ำยา + ท่อน้ำทิ้ง)", "ฝังก่อนฉาบ/ปิดฝ้า ทำทีหลังยาก"]
+  ]
+};
+function negTab(){
+  const B = n => n == null ? "ต้องเสนอราคา" : fmt(n);
+  const tab = (rows, h) => `<thead><tr><th>รายการ</th><th>ผรม.</th><th>โมเดล</th><th style="text-align:right">${h}</th></tr></thead><tbody>` +
+    rows.map(r => `<tr><td>${r[0]}<span class="why">${r[4]}</span></td><td>${r[1]}</td><td>${r[2]}</td><td class="money">${B(r[3])}</td></tr>`).join("") + "</tbody>";
+  const so = NEG.over.reduce((a, r) => a + r[3], 0), su = NEG.under.reduce((a, r) => a + (r[3] || 0), 0);
+  $("neg-over").innerHTML = tab(NEG.over, "มูลค่า (บาท)") + `<tfoot><tr><td colspan="3"><b>รวม</b></td><td class="money">${fmt(so)}</td></tr></tfoot>`;
+  $("neg-under").innerHTML = tab(NEG.under, "ต้องเพิ่ม (บาท)") + `<tfoot><tr><td colspan="3"><b>รวม (ที่มีราคา)</b></td><td class="money">${fmt(su)}</td></tr></tfoot>`;
+  $("neg-miss").innerHTML = NEG.missing.map(r => `<li><b>${r[0]}</b> — <span class="small">${r[1]}</span></li>`).join("");
+  $("neg-ask").innerHTML = NEG.ask.map(r => `<li><b>${r[0]}</b> — <span class="small">${r[1]}</span></li>`).join("");
+  $("negsum").innerHTML = [["1,000,000", "ราคา ผรม. (ตัวอย่าง)"], [fmt(so), "ปริมาณที่ดูเผื่อเกิน (ข้อ 3)"],
+    [fmt(su) + " +", "ต่ำกว่าแบบ ต้องเพิ่ม (ข้อ 1)"], [fmt(so - su), "เหลือต่อรอง หลังหักข้อ 1 (ก่อนข้อ 2)"]]
+    .map(([a, b]) => `<div><b>${a}</b><span>${b}</span></div>`).join("");
+}
+/* waste allowance applied to the model's net quantities */
+const WASTE = [
+  ["คอนกรีต (ทุกชนิด)", "5 %"], ["ทราย / คอนกรีตหยาบ", "10 %"],
+  ["เหล็กเสริม (นับเส้นจากแผนตัดแล้ว)", "+5 %"], ["ไม้แบบ", "5 %"],
+  ["เหล็กรูปพรรณ / ระแนง (นับเส้นจากแผนตัดแล้ว)", "+5 %"], ["ทาสีกันสนิม", "5 %"],
+  ["กระเบื้องหลังคา / ครอบ", "รวมแล้ว 5 % / 3 %"], ["เมทัลชีท / เชิงชาย / รางน้ำ", "5 %"],
+  ["ผนังอิฐ / ฉาบ / สี / เอ็น / เซี้ยม", "5 %"], ["ฝ้า / กระเบื้องพื้น / ผนัง", "5 %"],
+  ["ท่อประปา / สุขาภิบาล", "10 %"], ["ประตู หน้าต่าง อุปกรณ์ สุขภัณฑ์ (นับชุด)", "0 %"]
+];
+/* every line of the contractor quote, in its order: [item, contractor, model (net → with allowance), state 1 close / 0 differs / 2 n/a, note]
+   ตัวอย่าง (SAMPLE) — ใส่รายการจริงจากใบเสนอราคาของโปรเจกต์ */
+const BOQ = [
+  ["1 งานโครงสร้าง · ฐานราก (ตัวอย่าง)"],
+  ["คอนกรีต 240 ksc", "9 ลบ.ม.", "8.28 → 8.69", 1],
+  ["DB12 SD40", "55 เส้น", "66 → 70 เส้น", 0, "ตัวอย่าง: ผรม. ขาด"],
+  ["2 หลังคา (ตัวอย่าง)"],
+  ["จันทัน C100", "60 เส้น", "26 → 28 เส้น", 0],
+  ["มีในโมเดล แต่ไม่มีในใบเสนอราคา"],
+  ["ท่อน้ำดี PVC", "–", "74.8 → 82.3 ม.", 0]
+];
+function boqTable(){
+  const cls = s => s === 1 ? "okk" : s === 0 ? "flag" : "na";
+  $("boqtab").querySelector("tbody").innerHTML = BOQ.map(r => r.length === 1 ? `<tr class="grp"><td colspan="3">${r[0]}</td></tr>` :
+    `<tr><td>${r[0]}${r[4] ? `<span class="why">${r[4]}</span>` : ""}</td><td>${r[1]}</td><td class="${cls(r[3])}">${r[2]}</td></tr>`).join("");
+  $("wastetab").innerHTML = "<tbody>" + WASTE.map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join("") + "</tbody>";
+}
+
+/* ---------- issues ---------- */
+const ISSUES = [
+  [1, "แบบเป็นแบบร่าง (DRAFT)", "งานโครงสร้างทั้งหมดต้องให้วิศวกรโยธาตรวจและลงนามก่อนใช้ก่อสร้างจริง"],
+  [0, "ข้อตีความแบบ (ตัวอย่าง)", "เช่น ระดับในแบบหมายถึงผิวกระเบื้องหรือผิวโครงสร้าง — จดค่าที่สมมติไว้ทุกข้อ"],
+  [1, "วัสดุในใบเสนอราคาต่ำกว่าแบบ (ตัวอย่าง)", "เช่น แผ่นพื้น LL ต่ำกว่าแบบ, ระยะ wire mesh, ขนาดเหล็กตะเข้/ดั้ง"]
+];
+function issues(){
+  $("issues").innerHTML = ISSUES.map(([w, h, p]) => `<div class="issue ${w ? "" : "info"}"><h4>${h}</h4><p>${p}</p></div>`).join("");
+}
+
+/* ---------- gallery ---------- */
+const IMG_TH = {overview:"ภาพรวม", rebar:"เหล็กเสริม", closeup:"ระยะใกล้", ties:"เสาเอ็น/ทับหลัง", front:"ด้านหน้า", wings:"มุข",
+  back:"ด้านหลัง", frame:"โครงฝ้า", living:"ห้องนั่งเล่น", bath1:"ห้องน้ำ 1", steps:"บันได", conduit:"ท่อร้อยสาย", sanitary:"ระบบสุขาภิบาล"};
+function gallery(){
+  $("gal").innerHTML = KK.imgs.map(f => {
+    const st = f.slice(0, 4), rest = f.slice(5, -4).split(/[_]/).map(w => IMG_TH[w] || w).join(" ");
+    const cap = `${(REP_LABEL[st] || REP_LABEL[st + "a"] || st)} · ${rest}`;
+    return `<figure><img src="img/${f}" alt="${cap}" loading="lazy" data-cap="${cap}"><figcaption>${cap}</figcaption></figure>`;
+  }).join("");
+  $("gal").onclick = e => { const i = e.target.closest("img"); if (!i) return; $("lbimg").src = i.src; $("lbcap").textContent = i.dataset.cap; $("lb").classList.add("on"); };
+  $("lb").onclick = () => $("lb").classList.remove("on");
+  addEventListener("keydown", e => { if (e.key === "Escape") $("lb").classList.remove("on"); });
+}
+
+/* ---------- loop ---------- */
+function resize(){
+  const r = cv.parentElement.getBoundingClientRect();
+  renderer.setSize(r.width, r.height, false); camera.aspect = r.width / Math.max(r.height, 1); camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(cv.parentElement);
+function loop(now){
+  if (tween){
+    const k = Math.min(1, (now - tween.t0) / tween.d), e = k < .5 ? 2*k*k : 1 - Math.pow(-2*k + 2, 2)/2;
+    camera.position.lerpVectors(tween.from.p, tween.to.p, e); controls.target.lerpVectors(tween.from.t, tween.to.t, e);
+    if (k >= 1) tween = null;
+  }
+  controls.update(); hover(); renderer.render(scene, camera); requestAnimationFrame(loop);
+}
+themeScene(); qtyList(); boqTable(); negTab(); issues(); gallery(); resize();
+requestAnimationFrame(() => setTimeout(() => {
+  build(); layerList();
+  applyState(); $("loading").remove();
+  goView("iso"); if (tween){ camera.position.copy(tween.to.p); controls.target.copy(tween.to.t); tween = null; }
+  requestAnimationFrame(loop);
+}, 30));
+</script>
+</body>
+</html>
