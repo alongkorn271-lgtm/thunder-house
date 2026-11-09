@@ -14,7 +14,7 @@ os.makedirs(OUT, exist_ok=True)
 COL = {k: f"KK01 {k} {v}" for k, v in (("ST00", "Grid"), ("ST01", "Footings"), ("ST02", "Stubs"), ("ST03", "Ground beams"),
        ("ST04", "Floor"), ("ST05", "Columns"), ("ST06", "Walls"), ("ST07", "Roof frame"), ("ST08", "Roof cover"),
        ("ST09", "Ceilings"), ("ST10", "Paint"), ("ST11", "Tiles"), ("ST12", "Electrical"), ("ST12b", "Conduit"),
-       ("ST14", "Units"), ("ST16", "Sanitary"), ("ST18", "Extras"))}
+       ("ST14", "Units"), ("ST16", "Sanitary"), ("ST18", "Extras"), ("ST20", "Furniture"))}
 ORDER = list(COL)
 STRUCT = {"ST01", "ST02", "ST03", "ST04", "ST05", "ST06"}
 SKIP_EL = {"excavation"}
@@ -268,4 +268,6 @@ shot("ST16_stage", ["ST16"], ghost=S16, cam=(ISO, (CX, CY + 0.8, -0.2), 23.0), a
 shot("ST16_detail", ["ST16", "ST06"], ghost=["ST04", "ST05"], glassy={"brick", "plaster"}, cam=P((-3.2, -4.0, 2.6), (1.4, 3.4, 1.2), 30), accent=False, res=(1500, 1100))
 shot("ST18_stage", ["ST18"], ghost=S16 + ["ST11"], cam=(ISO, (CX, CY, 1.2), 21.5), accent=False, lines=False)
 shot("ST18_detail", ["ST18", "ST10", "ST11"], ghost=S16, cam=P((-3.0, -5.0, 1.0), (7.15, 0.85, 2.0), 30), accent=False, lines=False, res=(1500, 1100))
+shot("ST20_stage", ["ST20", "ST11", "ST14", "ST16"], ghost=["ST04", "ST05", "ST06"], cam=((-0.35, -0.75, 1.0), (CX, CY + 0.6, 0.8), 19.5), accent=False, lines=False)
+shot("ST20_detail", ["ST20", "ST11", "ST14"], ghost=["ST04", "ST05", "ST06"], cam=((-2.6, -3.6, 5.2), (7.0, 4.9, 0.9), 0, False, 24), accent=False, lines=False, res=(1500, 1100))
 print("ALL SHOTS DONE", flush=True)

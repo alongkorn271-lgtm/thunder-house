@@ -2,7 +2,7 @@
 # triangles otherwise, polylines for curves (structural rebar flagged rb=1).
 #     OUT=model.json [MODEL_SCRIPTS=<project>/Construction/scripts] blender -b <Construction.blend> -P export_model_json.py
 # Needs the project's loader (kk01_load.py: _world_bm, _obj_boxes, _world_bars, C_* collection names) from the
-# nuea-ai-blender-house Workflow B build. Edit LAYERS for another project's collections / labels.
+# stage-by-stage build (build_kk01.py). Edit LAYERS for another project's collections / labels.
 import os, json, bpy, bmesh
 KK01_DIR = os.environ.get("MODEL_SCRIPTS") or os.path.join(os.path.dirname(bpy.data.filepath), "scripts")
 exec(open(os.path.join(KK01_DIR, "kk01_load.py"), encoding="utf-8").read())
@@ -11,7 +11,8 @@ SKIP_EL = {"excavation", "paint", "grout", "adhesive", "membrane", "screed", "ti
 LAYERS = [(C_FOOT, "ST01 ฐานราก"), (C_STUB, "ST02 ตอม่อ"), (C_GB, "ST03 คานคอดิน"), (C_FLOOR, "ST04 พื้น"), (C_COL, "ST05 เสา"),
           (C_WALL, "ST06 ผนัง + ฉาบ"), (C_ROOF, "ST07 โครงหลังคา"), (C_COVER, "ST08 มุงหลังคา"), (C_CEIL, "ST09 ฝ้า"),
           (C_PAINT, "ST10 สี"), (C_TILE, "ST11 กระเบื้อง + บันได"), (C_ELEC, "ST12 อุปกรณ์ไฟฟ้า"), (C_COND, "ST12 ท่อร้อยสายไฟ"),
-          (C_UNIT, "ST14 ประตูหน้าต่าง"), (C_SAN, "ST16 สุขาภิบาล"), (C_EXTRA, "ST18 รายการย่อย")]
+          (C_UNIT, "ST14 ประตูหน้าต่าง"), (C_SAN, "ST16 สุขาภิบาล"), (C_EXTRA, "ST18 รายการย่อย"),
+          ("KK01 ST20 Furniture", "ST20 เฟอร์นิเจอร์")]
 mm = lambda v: int(round(v * 1000))
 
 
