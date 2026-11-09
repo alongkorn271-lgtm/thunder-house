@@ -24,9 +24,7 @@ for ln in open(LOG, encoding="utf-8", errors="replace").read().splitlines():
 assert len(rep) == len(ANCH), sorted(rep)
 imgs = sorted((f for f in os.listdir(os.path.join(H, "img")) if f.endswith(".jpg")), key=lambda f: (f[:4], "overview" not in f, f))
 tpl = open(os.path.join(H, "template.html"), encoding="utf-8").read()
-sp = os.path.join(H, "sales.json")
-sales = json.load(open(sp, encoding="utf-8")) if os.path.exists(sp) else None
-blob = json.dumps(dict(model=model, rep=rep, imgs=imgs, sales=sales), ensure_ascii=False, separators=(",", ":"))
+blob = json.dumps(dict(model=model, rep=rep, imgs=imgs), ensure_ascii=False, separators=(",", ":"))
 out = tpl.replace("/*__DATA__*/null", blob.replace("</", "<\\/"))
 open(os.path.join(H, "index.html"), "w", encoding="utf-8").write(out)
 print("index.html", os.path.getsize(os.path.join(H, "index.html")) // 1024, "KB;", sum(len(v) for v in rep.values()), "report lines;", len(imgs), "images")

@@ -34,11 +34,10 @@ a line-by-line contractor-BOQ comparison with negotiation points and an Excel wo
 
 ## ต้องมีก่อน
 
-- ไม่ต้องมี skill อื่น — สคริปต์ปั้นโมเดลก่อสร้าง ST00–ST20 (`scripts/model/`), ภาพ render, กล้อง + Material ID map,
-  หน้าเว็บ, BOQ และชุดแบบ เขียนเองทั้งหมดอยู่ใน skill นี้ (บ้านตัวอย่าง KK01 ใช้งานได้ทันที)
-- Blender 5.x (EEVEE + Workbench + Freestyle) · Python 3 + `Pillow`, `PyMuPDF` (fitz), `openpyxl`
-- Google Chrome หรือ Microsoft Edge (แปลง HTML → PDF ภาษาไทย) · Microsoft Excel ไม่บังคับ (คำนวณสูตรใหม่บน Windows)
-- ไม่บังคับ: บัญชี Google Flow (ภาพสมจริงจากโมเดล โควตาฟรีรายวัน)
+- โมเดลก่อสร้างทีละขั้นจาก **Workflow B ของ skill `nuea-ai-blender-house`** (`Construction/<PROJ>_Construction.blend`
+  ที่ build ผ่าน selfcheck แล้ว + log ของการ build) — skill นี้ใช้ loader ของโปรเจกต์นั้น (`_obj_boxes`, `_world_bars`, ชื่อ collection)
+- Blender 5.x (EEVEE + Freestyle) · Python 3 + `Pillow`, `PyMuPDF` (fitz), `openpyxl` · Google Chrome หรือ Microsoft Edge
+  (แปลง HTML → PDF ภาษาไทย) · Microsoft Excel (คำนวณสูตรใหม่บน Windows)
 
 ## ติดตั้ง
 

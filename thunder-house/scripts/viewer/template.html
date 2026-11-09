@@ -105,7 +105,6 @@ td.money{text-align:right;font-weight:600}
 ul.miss{padding-left:18px;margin:6px 0}ul.miss li{font-size:13.5px;margin:0 0 6px}
 .gal{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .gal figure{margin:0}
-.gal.flow img{aspect-ratio:9/16}
 .gal img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;border:1px solid var(--line);cursor:zoom-in;background:var(--surface2);display:block}
 .gal figcaption{font-size:12px;color:var(--muted);margin-top:3px}
 .lb{position:fixed;inset:0;background:rgba(10,14,18,.86);display:none;place-items:center;z-index:20;padding:16px}
@@ -154,7 +153,6 @@ ul.miss{padding-left:18px;margin:6px 0}ul.miss li{font-size:13.5px;margin:0 0 6p
         <button class="btn" id="rebar" aria-pressed="false">เหล็กเสริม</button>
         <button class="btn" id="edges" aria-pressed="true">เส้นขอบ</button>
         <button class="btn" id="soil" aria-pressed="true">ผิวดิน</button>
-        <button class="btn" id="furn" aria-pressed="true">เฟอร์นิเจอร์</button>
       </div>
     </div>
     <div class="tip" id="tip"></div>
@@ -167,7 +165,6 @@ ul.miss{padding-left:18px;margin:6px 0}ul.miss li{font-size:13.5px;margin:0 0 6p
       <button role="tab" aria-selected="false" data-tab="boq">เทียบ BOQ</button>
       <button role="tab" aria-selected="false" data-tab="neg">ต่อรอง</button>
       <button role="tab" aria-selected="false" data-tab="check">ต้องยืนยัน</button>
-      <button role="tab" aria-selected="false" data-tab="plan">แผนตกแต่ง</button>
       <button role="tab" aria-selected="false" data-tab="img">ภาพ render</button>
     </div>
 
@@ -225,32 +222,6 @@ ul.miss{padding-left:18px;margin:6px 0}ul.miss li{font-size:13.5px;margin:0 0 6p
       <h2>สิ่งที่ต้องยืนยัน</h2>
       <p class="small">ข้อตีความแบบและค่าที่สมมติไว้ระหว่างปั้นโมเดล (รายละเอียดอยู่ในไฟล์ spec ของแต่ละขั้น)</p>
       <div id="issues"></div>
-    </div>
-
-    <div class="pane" id="p-plan">
-      <h2>บ้าน KK01 หลังตกแต่ง</h2>
-      <p class="small">ภาพ 3D ด้านซ้ายเปลี่ยนเป็น <b>โมเดลขาย</b> พร้อมเฟอร์นิเจอร์ · สไตล์ Warm Contemporary + Modern Tropical</p>
-      <div class="toggles" style="margin:8px 0 14px"><button class="btn" id="salesRoof" aria-pressed="false">แสดงหลังคา</button></div>
-
-      <h3>ภาพสมจริงจาก AI (Google Flow)</h3>
-      <p class="small">ภาพจาก Blender ที่เตรียมส่ง Google Flow — ภาพสมจริงจะมาแทนทีละห้องเมื่อ generate แล้ว</p>
-      <div class="gal flow">
-        <figure><img src="img/plan/flow_01_exterior.jpg" alt="ภายนอก" data-cap="ภายนอก · รอภาพจาก Google Flow"><figcaption>ภายนอก · รอภาพ AI</figcaption></figure>
-        <figure><img src="img/plan/flow_02_living.jpg" alt="ห้องนั่งเล่น" data-cap="ห้องนั่งเล่น · รอภาพจาก Google Flow"><figcaption>ห้องนั่งเล่น · รอภาพ AI</figcaption></figure>
-        <figure><img src="img/plan/flow_03_kitchen.jpg" alt="ครัว" data-cap="ครัว / ทานข้าว · รอภาพจาก Google Flow"><figcaption>ครัว / ทานข้าว · รอภาพ AI</figcaption></figure>
-        <figure><img src="img/plan/flow_04_bed1.jpg" alt="ห้องนอน 1" data-cap="ห้องนอน 1 · รอภาพจาก Google Flow"><figcaption>ห้องนอน 1 · รอภาพ AI</figcaption></figure>
-        <figure><img src="img/plan/flow_05_bed2.jpg" alt="ห้องนอน 2" data-cap="ห้องนอน 2 · รอภาพจาก Google Flow"><figcaption>ห้องนอน 2 · รอภาพ AI</figcaption></figure>
-        <figure><img src="img/plan/flow_06_bed3.jpg" alt="ห้องนอน 3" data-cap="ห้องนอน 3 · รอภาพจาก Google Flow"><figcaption>ห้องนอน 3 · รอภาพ AI</figcaption></figure>
-      </div>
-
-      <h3>ภาพจากโมเดลขาย (Blender)</h3>
-      <div class="gal">
-        <figure><img src="img/plan/sales_exterior.jpg" alt="ภายนอก" data-cap="โมเดลขาย · ภายนอก"><figcaption>ภายนอก</figcaption></figure>
-        <figure><img src="img/plan/sales_dollhouse.jpg" alt="ผังบ้านตุ๊กตา" data-cap="โมเดลขาย · มุมมองบ้านตุ๊กตา (ถอดหลังคา)"><figcaption>บ้านตุ๊กตา (ถอดหลังคา)</figcaption></figure>
-        <figure><img src="img/plan/sales_living.jpg" alt="ห้องนั่งเล่น" data-cap="โมเดลขาย · ห้องนั่งเล่น"><figcaption>ห้องนั่งเล่น</figcaption></figure>
-        <figure><img src="img/plan/sales_bed1.jpg" alt="ห้องนอน 1" data-cap="โมเดลขาย · ห้องนอน 1"><figcaption>ห้องนอน 1</figcaption></figure>
-        <figure><img src="img/plan/sales_kitchen.jpg" alt="ครัว" data-cap="โมเดลขาย · ครัว"><figcaption>ครัว / ทานข้าว</figcaption></figure>
-      </div>
     </div>
 
     <div class="pane" id="p-img">
@@ -380,8 +351,7 @@ function build(){
 }
 
 /* ---------- state ---------- */
-const FURN = LAYERS.findIndex(l => l.startsWith("ST20"));
-const XRAY_SKIP = new Set([6, 11, 12, 14, FURN]);          // roof frame, electrical, conduit, sanitary stay solid in x-ray
+const XRAY_SKIP = new Set([6, 11, 12, 14]);          // roof frame, electrical, conduit, sanitary stay solid in x-ray
 const STRUCT = new Set([0,1,2,3,4,5]);
 const state = {seq:LAYERS.length, expl:0, cut:-1000, lvl:6400, xray:false, rebar:false, edges:true, soil:true, vis:LAYERS.map(()=>true), sel:null};
 function applyState(){
@@ -399,7 +369,6 @@ function applyState(){
     mat.opacity = op; mat.transparent = op < 1; mat.depthWrite = op >= 0.5;
     mat.emissive.setHex(state.sel === m ? 0x8a3a00 : 0x000000);
     if (m.userData.edge) m.userData.edge.visible = state.edges && op >= 0.5;
-    if (salesMode) m.visible = false;
   });
   clipY.constant = state.cut > -1000 ? -state.cut/1000 : 100;
   clipZ.constant = state.lvl < 6400 ? state.lvl/1000 : 100;
@@ -450,12 +419,7 @@ $("expl").oninput = e => { state.expl = +e.target.value; applyState(); };
 $("cut").oninput = e => { state.cut = +e.target.value; applyState(); };
 $("lvl").oninput = e => { state.lvl = +e.target.value; applyState(); };
 const toggle = (id, key) => $(id).onclick = e => { state[key] = !state[key]; e.currentTarget.setAttribute("aria-pressed", state[key]); applyState(); };
-toggle("xray", "xray"); toggle("rebar", "rebar");
-$("seq").max = LAYERS.length; $("seq").value = LAYERS.length;
-if (FURN < 0) $("furn").remove(); else $("furn").onclick = e => {
-  state.vis[FURN] = !state.vis[FURN]; e.currentTarget.setAttribute("aria-pressed", state.vis[FURN]);
-  const cb = document.getElementById("lg-" + FURN); if (cb) cb.checked = state.vis[FURN]; applyState();
-}; toggle("edges", "edges"); toggle("soil", "soil");
+toggle("xray", "xray"); toggle("rebar", "rebar"); toggle("edges", "edges"); toggle("soil", "soil");
 let anim = null;
 $("anim").onclick = e => {
   if (anim){ clearInterval(anim); anim = null; e.currentTarget.setAttribute("aria-pressed", false); e.currentTarget.textContent = "▶ เล่นลำดับก่อสร้าง"; return; }
@@ -502,26 +466,6 @@ function layerList(){
 function showTab(k){
   document.querySelectorAll("[data-tab]").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === k));
   document.querySelectorAll(".pane").forEach(p => p.classList.toggle("on", p.id === "p-" + k));
-  setSales(k === "plan");
-}
-/* ---------- sales model (shown with the furnishing tab) ---------- */
-let salesGroup = null, salesMode = false, salesRoof = false;
-function buildSales(){
-  salesGroup = new THREE.Group();
-  (KK.sales && KK.sales.parts || []).forEach(p => {
-    const g = triGeo(p.v, p.f); g.computeBoundingSphere();
-    const m = new THREE.Mesh(g, new THREE.MeshLambertMaterial({color:p.c, side:THREE.DoubleSide, clippingPlanes:CLIPS}));
-    m.userData.roof = !!p.roof;
-    const e = new THREE.LineSegments(new THREE.EdgesGeometry(g, 30), edgeMat); e.raycast = () => {}; m.add(e);
-    salesGroup.add(m);
-  });
-  scene.add(salesGroup);
-}
-function setSales(on){
-  salesMode = on;
-  if (on && !salesGroup && KK.sales) buildSales();
-  if (salesGroup){ salesGroup.visible = on; salesGroup.children.forEach(m => { if (m.userData.roof) m.visible = salesRoof; }); }
-  applyState();
 }
 document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => showTab(b.dataset.tab));
 
@@ -670,8 +614,6 @@ function gallery(){
   }).join("");
   $("gal").onclick = e => { const i = e.target.closest("img"); if (!i) return; $("lbimg").src = i.src; $("lbcap").textContent = i.dataset.cap; $("lb").classList.add("on"); };
   $("lb").onclick = () => $("lb").classList.remove("on");
-  $("p-plan").onclick = e => { const i = e.target.closest("img"); if (!i) return; $("lbimg").src = i.src; $("lbcap").textContent = i.dataset.cap; $("lb").classList.add("on"); };
-  $("salesRoof").onclick = e => { e.stopPropagation(); salesRoof = !salesRoof; e.currentTarget.setAttribute("aria-pressed", salesRoof); setSales(salesMode); };
   addEventListener("keydown", e => { if (e.key === "Escape") $("lb").classList.remove("on"); });
 }
 
